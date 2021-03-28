@@ -22,7 +22,7 @@ func main() {
 
 	out, err = exec.Command("git", "describe").Output()
 	if err != nil {
-		panic(err)
+		out = []byte("v0.0.0")
 	}
 
 	version := strings.TrimPrefix(strings.TrimSpace(string(out)), "v")
