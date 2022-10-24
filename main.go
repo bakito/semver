@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,12 +12,15 @@ import (
 )
 
 func main() {
+	skipBranchCheck := flag.Bool("skip-branch-check", false, "Skip the branch check")
+	flag.Parse()
+	
 	out, err := exec.Command("git", "branch", "--show-current").Output()
 	if err != nil {
 		panic(err)
 	}
 	branch := strings.TrimSpace(string(out))
-	if branch != "main" && branch != "master" {
+	if !*skipBranchCheck && (branch != "main" && branch != "master") {
 		panic(fmt.Errorf(`error: must be in "master/main" branch, current branch: %q`, branch))
 	}
 
