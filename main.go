@@ -13,6 +13,7 @@ import (
 
 func main() {
 	getNext := flag.Bool("next", false, "Just print the next version")
+	asNumber := flag.Bool("numeric", false, "Numeric form")
 	flag.Parse()
 
 	out, err := exec.Command("git", "branch", "--show-current").Output()
@@ -51,5 +52,9 @@ func main() {
 			panic(err)
 		}
 	}
-	fmt.Printf("v%v", v)
+	if *asNumber {
+		fmt.Printf("%v", v)
+	} else {
+		fmt.Printf("v%v", v)
+	}
 }
