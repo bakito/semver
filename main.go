@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	getNext := flag.Bool("get-next", false, "Just print the next version")
+	getNext := flag.Bool("next", false, "Just print the next version")
 	flag.Parse()
 
 	out, err := exec.Command("git", "branch", "--show-current").Output()
