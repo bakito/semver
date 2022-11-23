@@ -25,7 +25,7 @@ func main() {
 		panic(fmt.Errorf(`error: must be in "master/main" branch, current branch: %q`, branch))
 	}
 
-	out, err = exec.Command("git", "describe").Output()
+	out, err = exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
 	if err != nil {
 		out = []byte("v0.0.0")
 	}
