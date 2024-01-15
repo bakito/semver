@@ -16,27 +16,20 @@ func main() {
 	asNumber := flag.Bool("numeric", false, "Numeric form")
 	flag.Parse()
 
-	out, err := exec.Command("git", "branch", "--show-current").Output()
-	if err != nil {
-		panic(err)
-	}
-	branch := strings.TrimSpace(string(out))
+	branch := getCurrentBranch()
 	if !*getNext && (branch != "main" && branch != "master") {
 		panic(fmt.Errorf(`error: must be in "master/main" branch, current branch: %q`, branch))
 	}
 
-	out, err = exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
-	if err != nil {
-		out = []byte("v0.0.0")
-	}
+	lastTag := getLastTag()
 
-	version := strings.TrimPrefix(strings.TrimSpace(string(out)), "v")
+	version := strings.TrimPrefix(strings.TrimSpace(lastTag), "v")
 	v := semver.New(version)
 	v.BumpPatch()
 
 	if !*getNext {
 		reader := bufio.NewReader(os.Stdin)
-		if _, err = fmt.Fprintf(os.Stderr, "Enter Release Version: [v%v] ", v); err != nil {
+		if _, err := fmt.Fprintf(os.Stderr, "Enter Release Version: [v%v] ", v); err != nil {
 			panic(err)
 		}
 
@@ -57,4 +50,20 @@ func main() {
 	} else {
 		fmt.Printf("v%v", v)
 	}
+}
+
+func getLastTag() string {
+	out, err := exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
+	if err != nil {
+		out = []byte("v0.0.0")
+	}
+	return string(out)
+}
+
+func getCurrentBranch() string {
+	out, err := exec.Command("git", "branch", "--show-current").Output()
+	if err != nil {
+		panic(err)
+	}
+	return strings.TrimSpace(string(out))
 }
