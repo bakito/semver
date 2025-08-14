@@ -11,14 +11,12 @@ import (
 	"github.com/coreos/go-semver/semver"
 )
 
-// Introduced constants for well-known values.
 const (
 	branchMain   = "main"
 	branchMaster = "master"
 	defaultTag   = "v0.0.0"
 )
 
-// Extracted: centralize version formatting to avoid duplication.
 func formatVersion(v *semver.Version, numeric bool) string {
 	if numeric {
 		return v.String()
@@ -26,14 +24,12 @@ func formatVersion(v *semver.Version, numeric bool) string {
 	return "v" + v.String()
 }
 
-// Extracted: encapsulate release-branch validation for clarity.
 func mustBeOnReleaseBranch(isNext, isCurrent bool, branch string) {
 	if !isNext && !isCurrent && (branch != branchMain && branch != branchMaster) {
 		panic(fmt.Errorf(`error: must be in "master/main" branch, current branch: %q`, branch))
 	}
 }
 
-// Extracted: prompt the user for a version, with default shown and validation.
 func promptVersion(defaultV *semver.Version) *semver.Version {
 	reader := bufio.NewReader(os.Stdin)
 	if _, err := fmt.Fprintf(os.Stderr, "Enter Release Version: [v%v] ", defaultV); err != nil {
@@ -51,7 +47,6 @@ func promptVersion(defaultV *semver.Version) *semver.Version {
 	return semver.New(strings.TrimSpace(text))
 }
 
-// ... existing code ...
 func main() {
 	flagNext := flag.Bool("next", false, "Just print the next version")
 	flagCurrent := flag.Bool("current", false, "Just print the current version")
