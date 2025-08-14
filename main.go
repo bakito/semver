@@ -11,54 +11,74 @@ import (
 	"github.com/coreos/go-semver/semver"
 )
 
-func main() {
-	getNext := flag.Bool("next", false, "Just print the next version")
-	getCurrent := flag.Bool("current", false, "Just print the current version")
-	asNumber := flag.Bool("numeric", false, "Numeric form")
-	flag.Parse()
+// Introduced constants for well-known values.
+const (
+	branchMain   = "main"
+	branchMaster = "master"
+	defaultTag   = "v0.0.0"
+)
 
-	branch := getCurrentBranch()
-	if !*getNext && !*getCurrent && (branch != "main" && branch != "master") {
+// Extracted: centralize version formatting to avoid duplication.
+func formatVersion(v *semver.Version, numeric bool) string {
+	if numeric {
+		return v.String()
+	}
+	return "v" + v.String()
+}
+
+// Extracted: encapsulate release-branch validation for clarity.
+func mustBeOnReleaseBranch(isNext, isCurrent bool, branch string) {
+	if !isNext && !isCurrent && (branch != branchMain && branch != branchMaster) {
 		panic(fmt.Errorf(`error: must be in "master/main" branch, current branch: %q`, branch))
 	}
+}
 
-	lastTag := getLastTag()
-
-	version := strings.TrimPrefix(strings.TrimSpace(lastTag), "v")
-	v := semver.New(version)
-	if *getCurrent {
-		if *asNumber {
-			fmt.Printf("%v", v)
-		} else {
-			fmt.Printf("v%v", v)
-		}
-		return
-	}
-
-	v.BumpPatch()
-	if *getNext {
-		if *asNumber {
-			fmt.Printf("%v", v)
-		} else {
-			fmt.Printf("v%v", v)
-		}
-		return
-	}
-
+// Extracted: prompt the user for a version, with default shown and validation.
+func promptVersion(defaultV *semver.Version) *semver.Version {
 	reader := bufio.NewReader(os.Stdin)
-	if _, err := fmt.Fprintf(os.Stderr, "Enter Release Version: [v%v] ", v); err != nil {
+	if _, err := fmt.Fprintf(os.Stderr, "Enter Release Version: [v%v] ", defaultV); err != nil {
 		panic(err)
 	}
-
 	text, err := reader.ReadString('\n')
 	if err != nil {
 		panic(err)
 	}
-	if strings.HasPrefix(text, "v") {
-		text = text[1:]
-		v = semver.New(strings.TrimSpace(text))
+	text = strings.TrimSpace(text)
+	if text == "" {
+		return defaultV
 	}
-	if _, err = fmt.Fprintf(os.Stderr, "Using Version: v%v\n", v); err != nil {
+	text = strings.TrimPrefix(text, "v")
+	return semver.New(strings.TrimSpace(text))
+}
+
+// ... existing code ...
+func main() {
+	flagNext := flag.Bool("next", false, "Just print the next version")
+	flagCurrent := flag.Bool("current", false, "Just print the current version")
+	flagNumeric := flag.Bool("numeric", false, "Numeric form")
+	flag.Parse()
+
+	branch := getCurrentBranch()
+	mustBeOnReleaseBranch(*flagNext, *flagCurrent, branch)
+
+	lastTag := getLastTag()
+	version := strings.TrimPrefix(strings.TrimSpace(lastTag), "v")
+	v := semver.New(version)
+
+	if *flagCurrent {
+		fmt.Print(formatVersion(v, *flagNumeric))
+		return
+	}
+
+	v.BumpPatch()
+
+	if *flagNext {
+		fmt.Print(formatVersion(v, *flagNumeric))
+		return
+	}
+
+	v = promptVersion(v)
+	if _, err := fmt.Fprintf(os.Stderr, "Using Version: %s\n", formatVersion(v, false)); err != nil {
 		panic(err)
 	}
 }
@@ -66,9 +86,9 @@ func main() {
 func getLastTag() string {
 	out, err := exec.Command("git", "describe", "--tags", "--abbrev=0").Output()
 	if err != nil {
-		out = []byte("v0.0.0")
+		out = []byte(defaultTag)
 	}
-	return string(out)
+	return strings.TrimSpace(string(out))
 }
 
 func getCurrentBranch() string {
