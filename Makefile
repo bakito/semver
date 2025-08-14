@@ -1,3 +1,6 @@
+# Include toolbox tasks
+include ./.toolbox.mk
+
 # Run go fmt against code
 fmt:
 	go fmt ./...
@@ -7,9 +10,8 @@ fmt:
 vet:
 	go vet ./...
 
-# Run golangci-lint
-lint:
-	golangci-lint run
+lint: tb.golangci-lint
+	$(TB_GOLANGCI_LINT) run --fix
 
 # Run go mod tidy
 tidy:
@@ -20,10 +22,12 @@ test: tidy fmt vet
 	go test ./...  -coverprofile=coverage.out
 	go tool cover -func=coverage.out
 
-release:
-	@version=$$(semver); \
+.PHONY: release
+release: tb.semver tb.goreleaser
+	@version=$$($(TB_SEMVER)); \
 	git tag -s $$version -m"Release $$version"
-	goreleaser --rm-dist
+	$(TB_GORELEASER) --clean --parallelism 2
 
-test-release:
-	goreleaser --skip-publish --snapshot --rm-dist
+.PHONY: test-release
+test-release: tb.goreleaser
+	$(TB_GORELEASER) --skip=publish --snapshot --clean --parallelism 2
