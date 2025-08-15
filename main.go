@@ -76,6 +76,7 @@ func main() {
 	if _, err := fmt.Fprintf(os.Stderr, "Using Version: %s\n", formatVersion(v, false)); err != nil {
 		panic(err)
 	}
+	fmt.Print(formatVersion(v, *flagNumeric))
 }
 
 func getLastTag() string {
