@@ -17,6 +17,8 @@ const (
 	defaultTag   = "v0.0.0"
 )
 
+var Version = "devel"
+
 func formatVersion(v *semver.Version, numeric bool) string {
 	if numeric {
 		return v.String()
@@ -48,10 +50,16 @@ func promptVersion(defaultV *semver.Version) *semver.Version {
 }
 
 func main() {
+	flagVersion := flag.Bool("version", false, "Print semver version and exit")
 	flagNext := flag.Bool("next", false, "Just print the next version")
 	flagCurrent := flag.Bool("current", false, "Just print the current version")
 	flagNumeric := flag.Bool("numeric", false, "Numeric form")
 	flag.Parse()
+
+	if *flagVersion {
+		fmt.Printf("semver has version %s\n", Version)
+		return
+	}
 
 	branch := getCurrentBranch()
 	mustBeOnReleaseBranch(*flagNext, *flagCurrent, branch)
