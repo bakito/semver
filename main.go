@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/bakito/semver/version"
 	"github.com/coreos/go-semver/semver"
 )
 
@@ -16,8 +17,6 @@ const (
 	branchMaster = "master"
 	defaultTag   = "v0.0.0"
 )
-
-var Version = "devel"
 
 func formatVersion(v *semver.Version, numeric bool) string {
 	if numeric {
@@ -57,7 +56,7 @@ func main() {
 	flag.Parse()
 
 	if *flagVersion {
-		fmt.Printf("semver has version %s\n", Version)
+		fmt.Printf("semver has version %s\n", version.Version)
 		return
 	}
 

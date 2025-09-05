@@ -3,7 +3,7 @@ builds:
 - env:
   - CGO_ENABLED=0
   ldflags:
-    - -s -w -X github.com/bakito/semver.Version=v{{.Version}}
+    - -s -w -X github.com/bakito/semver/version.Version=v{{.Version}}
   goos:
   - linux
   - windows
