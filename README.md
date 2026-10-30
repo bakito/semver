@@ -18,3 +18,11 @@ version=$(semver); \
 git tag -s $version -m"Release $version"
 goreleaser --rm-dist
 ```
+
+Use `-prefix` to select the latest merged tag whose name starts with that prefix followed by `-`. The `-` separator is added automatically, so the prefix must not end (or start) with `-`. The version after the prefix must be valid semver; the next version is its patch increment:
+
+```bash
+semver -prefix api -next
+```
+
+Tags such as `api-v1.2.3` and `api-1.2.3` are supported. The output keeps the prefix and whether the selected tag used a leading `v`; `-numeric` prints only the semver version.
