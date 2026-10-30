@@ -18,15 +18,11 @@ const (
 	defaultTag   = "v0.0.0"
 )
 
-func formatVersion(v *semver.Version, numeric bool, prefix string, withV bool) string {
-	if numeric {
-		return v.String()
+func formatVersion(v *semver.Version, numeric, withV bool) string {
+	if !numeric && withV {
+		return "v" + v.String()
 	}
-	versionPrefix := ""
-	if withV {
-		versionPrefix = "v"
-	}
-	return prefix + versionPrefix + v.String()
+	return v.String()
 }
 
 func mustBeOnReleaseBranch(isNext, isCurrent bool, branch string) {
@@ -37,7 +33,7 @@ func mustBeOnReleaseBranch(isNext, isCurrent bool, branch string) {
 
 func promptVersion(defaultV *semver.Version, prefix string, withV bool) *semver.Version {
 	reader := bufio.NewReader(os.Stdin)
-	if _, err := fmt.Fprintf(os.Stderr, "Enter Release Version: [%s] ", formatVersion(defaultV, false, prefix, withV)); err != nil {
+	if _, err := fmt.Fprintf(os.Stderr, "Enter Release Version: [%s] ", formatVersion(defaultV, false, withV)); err != nil {
 		panic(err)
 	}
 	text, err := reader.ReadString('\n')
@@ -81,22 +77,22 @@ func main() {
 	}
 
 	if *flagCurrent {
-		fmt.Print(formatVersion(v, *flagNumeric, prefix, withV))
+		fmt.Print(formatVersion(v, *flagNumeric, withV))
 		return
 	}
 
 	v.BumpPatch()
 
 	if *flagNext {
-		fmt.Print(formatVersion(v, *flagNumeric, prefix, withV))
+		fmt.Print(formatVersion(v, *flagNumeric, withV))
 		return
 	}
 
 	v = promptVersion(v, prefix, withV)
-	if _, err := fmt.Fprintf(os.Stderr, "Using Version: %s\n", formatVersion(v, false, prefix, withV)); err != nil {
+	if _, err := fmt.Fprintf(os.Stderr, "Using Version: %s\n", formatVersion(v, false, withV)); err != nil {
 		panic(err)
 	}
-	fmt.Print(formatVersion(v, *flagNumeric, prefix, withV))
+	fmt.Print(formatVersion(v, *flagNumeric, withV))
 }
 
 func normalizePrefix(prefix string) (string, error) {

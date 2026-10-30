@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/coreos/go-semver/semver"
+)
 
 func TestLatestTag(t *testing.T) {
 	tests := []struct {
@@ -85,6 +89,27 @@ func TestNormalizePrefix(t *testing.T) {
 			}
 			if got != test.want {
 				t.Errorf("normalizePrefix() = %q, want %q", got, test.want)
+			}
+		})
+	}
+}
+
+func TestFormatVersion(t *testing.T) {
+	tests := []struct {
+		name    string
+		numeric bool
+		withV   bool
+		want    string
+	}{
+		{name: "with v", withV: true, want: "v1.2.3"},
+		{name: "without v", want: "1.2.3"},
+		{name: "numeric with v", numeric: true, withV: true, want: "1.2.3"},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := formatVersion(semver.New("1.2.3"), test.numeric, test.withV); got != test.want {
+				t.Errorf("formatVersion() = %q, want %q", got, test.want)
 			}
 		})
 	}

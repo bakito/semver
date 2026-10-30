@@ -25,4 +25,4 @@ Use `-prefix` to select the latest merged tag whose name starts with that prefix
 semver -prefix api -next
 ```
 
-Tags such as `api-v1.2.3` and `api-1.2.3` are supported. The output keeps the prefix and whether the selected tag used a leading `v`; `-numeric` prints only the semver version.
+Tags such as `api-v1.2.3` and `api-1.2.3` are supported. The prefix is not part of the output: only the version is printed, keeping whether the selected tag used a leading `v`; `-numeric` prints only the numeric semver version.
